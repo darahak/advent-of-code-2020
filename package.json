@@ -1,0 +1,27 @@
+{
+  "name": "advent-of-code-2020",
+  "description": "My code for the 2020 edition of Advent of Code",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=14.8.0"
+  },
+  "scripts": {
+    "test": "node main.js",
+    "fetch": "node fetch.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darahak/advent-of-code-2020.git"
+  },
+  "author": "Dara Hak",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^14.14.7",
+    "@types/node-fetch": "^2.5.7",
+    "eslint": "^7.13.0",
+    "prettier": "^2.1.2"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
+}
