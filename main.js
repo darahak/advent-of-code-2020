@@ -1,5 +1,7 @@
-const help = 'Please provide a date to run, e.g. `node main.js 1` for day 1.';
+const fs = require('fs');
+const path = require('path');
 
+const help = 'Please provide a date to run, e.g. `node main.js 1` for day 1.';
 const args = process.argv.slice(2);
 
 if (args.length < 1) {
@@ -15,5 +17,10 @@ if (Number.isNaN(number)) {
 }
 
 const puzzle = require(`./day${number}`);
+const input = fs.readFileSync(
+  path.join(__dirname, `day${number}`, 'input.txt'),
+  { encoding: 'utf8' }
+);
 
-console.log(`Result: ${puzzle()}`);
+console.log(`Result for day ${number} part 1: ${puzzle.first(input)}`);
+console.log(`Result for day ${number} part 2: ${puzzle.second(input)}`);
