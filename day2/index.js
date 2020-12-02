@@ -1,7 +1,7 @@
 module.exports = {
   /** @argument input {string} */
   first(input) {
-    const lines = input.split('\n').filter(Boolean);
+    const lines = input.trim().split('\n');
 
     const rePasswords = /(?<min>\d+)-(?<max>\d+)\s(?<letter>\w):\s(?<password>\w+)/;
 
@@ -35,7 +35,7 @@ module.exports = {
 
   /** @argument input {string} */
   second(input) {
-    const lines = input.split('\n').filter(Boolean);
+    const lines = input.trim().split('\n');
 
     const rePasswords = /(?<posA>\d+)-(?<posB>\d+)\s(?<letter>\w):\s(?<password>\w+)/;
 

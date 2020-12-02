@@ -2,8 +2,8 @@ module.exports = {
   /** @argument input {string} */
   first(input) {
     const entries = input
+      .trim()
       .split('\n')
-      .filter(Boolean)
       .map((entry) => Number.parseInt(entry));
 
     for (let i = 0; i < entries.length; ++i) {
@@ -20,8 +20,8 @@ module.exports = {
   /** @argument input {string} */
   second(input) {
     const entries = input
+      .trim()
       .split('\n')
-      .filter(Boolean)
       .map((entry) => Number.parseInt(entry));
 
     for (let i = 0; i < entries.length; ++i) {
