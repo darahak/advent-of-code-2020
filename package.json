@@ -6,6 +6,7 @@
     "node": ">=14.8.0"
   },
   "scripts": {
+    "setup": "node setup.js",
     "test": "node main.js"
   },
   "repository": {
