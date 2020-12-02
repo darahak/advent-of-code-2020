@@ -1,5 +1,3 @@
-const { SSL_OP_SSLEAY_080_CLIENT_DH_BUG } = require('constants');
-
 module.exports = {
   /** @argument input {string} */
   first(input) {
