@@ -9,7 +9,6 @@ module.exports = {
     const deviceJoltage = Math.max(...numbers) + 3;
 
     let list1 = [];
-    let list2 = [];
     let list3 = [];
     let rating = 0;
 
@@ -28,7 +27,6 @@ module.exports = {
           const value = numbers[i2];
 
           rating = value;
-          list2.push(value);
         } else {
           const i3 = numbers.indexOf(rating + 3);
 
@@ -55,5 +53,47 @@ module.exports = {
       .trim()
       .split('\n')
       .map((number) => Number.parseInt(number));
+
+    const sortedNumbers = [
+      0,
+      ...numbers.sort((a, b) => a - b),
+      Math.max(...numbers) + 3,
+    ];
+
+    /** @type {Map<string, number>} */
+    let results = new Map();
+
+    return countCombinations(sortedNumbers, results);
   },
 };
+
+/**
+ * @param {Array<number>} sortedNumbers
+ * @param {Map<string, number>} results
+ * @returns {number}
+ */
+function countCombinations(sortedNumbers, results) {
+  const id = sortedNumbers.join();
+
+  if (results.has(id)) {
+    return results.get(id);
+  }
+
+  let result = 1;
+
+  for (let i = 1; i < sortedNumbers.length - 1; ++i) {
+    const previous = sortedNumbers[i - 1];
+    const next = sortedNumbers[i + 1];
+
+    if (next - previous < 4) {
+      result += countCombinations(
+        [previous, ...sortedNumbers.slice(i + 1)],
+        results
+      );
+    }
+  }
+
+  results.set(id, result);
+
+  return result;
+}
