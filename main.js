@@ -22,5 +22,18 @@ const input = fs.readFileSync(
   { encoding: 'utf8' }
 );
 
-console.log(`Result for day ${number} part 1: ${puzzle.first(input)}`);
-console.log(`Result for day ${number} part 2: ${puzzle.second(input)}`);
+const start1 = Date.now();
+const result1 = puzzle.first(input);
+const seconds1 = (Date.now() - start1) / 1000;
+
+console.log(
+  `Result for day ${number} part 1: ${result1} (${seconds1} seconds)`
+);
+
+const start2 = Date.now();
+const result2 = puzzle.second(input);
+const seconds2 = (Date.now() - start2) / 1000;
+
+console.log(
+  `Result for day ${number} part 2: ${result2} (${seconds2} seconds)`
+);
