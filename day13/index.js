@@ -34,33 +34,26 @@ module.exports = {
   second(input) {
     const lines = input.trim().split('\n');
 
-    const buses = lines[1]
+    const values = lines[1]
       .split(',')
       .map((value) => (value === 'x' ? null : Number.parseInt(value)));
 
-    const rules = buses
+    const rules = values
       .map((bus, i) => {
         return { bus, offset: i };
       })
       .filter((rule) => rule.bus !== null);
 
     let timestamp = 0;
+    let { bus: skip } = rules.shift();
 
-    for (let i = 1; ; ++i) {
-      timestamp = rules[0].bus * i;
-
-      let valid = true;
-
-      for (let j = 0; j < rules.length; ++j) {
-        const { bus, offset } = rules[j];
-
-        valid = valid && (timestamp + offset) % bus === 0;
+    rules.forEach(({ bus, offset }) => {
+      while ((timestamp + offset) % bus !== 0) {
+        timestamp += skip;
       }
 
-      if (valid) {
-        break;
-      }
-    }
+      skip *= bus;
+    });
 
     return timestamp;
   },
