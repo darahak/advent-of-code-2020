@@ -1,11 +1,11 @@
 module.exports = {
   /** @argument input {string} */
   first(input) {
-    // TODO
+    const lines = input.trim().split('\n');
   },
 
   /** @argument input {string} */
   second(input) {
-    // TODO
+    const lines = input.trim().split('\n');
   },
 };
