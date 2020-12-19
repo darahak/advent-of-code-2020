@@ -3,22 +3,7 @@ module.exports = {
   first(input) {
     const [rawRanges, , rawNearbyTickets] = input.trim().split('\n\n');
 
-    const rules = rawRanges.split('\n').map((line) => {
-      const re = /(?<id>\w+\s*\w*):\s(?<range1>\d+-\d+)\sor\s(?<range2>\d+-\d+)/g;
-      const match = re.exec(line);
-
-      const { id, range1, range2 } = match.groups;
-
-      const [min1, max1] = range1.split('-').map((x) => Number.parseInt(x));
-      const [min2, max2] = range2.split('-').map((x) => Number.parseInt(x));
-
-      return {
-        id,
-        range1: { min: min1, max: max1 },
-        range2: { min: min2, max: max2 },
-      };
-    });
-
+    const rules = parseRules(rawRanges);
     const nearbyTickets = rawNearbyTickets
       .split('\n')
       .slice(1)
@@ -44,55 +29,21 @@ module.exports = {
   second(input) {
     const [rawRanges, rawTicket, rawNearbyTickets] = input.trim().split('\n\n');
 
-    let rules = rawRanges.split('\n').map((line) => {
-      const re = /(?<id>\w+\s*\w*):\s(?<range1>\d+-\d+)\sor\s(?<range2>\d+-\d+)/g;
-      const match = re.exec(line);
-
-      const { id, range1, range2 } = match.groups;
-
-      const [min1, max1] = range1.split('-').map((x) => Number.parseInt(x));
-      const [min2, max2] = range2.split('-').map((x) => Number.parseInt(x));
-
-      return {
-        id,
-        range1: { min: min1, max: max1 },
-        range2: { min: min2, max: max2 },
-      };
-    });
-
+    const rules = parseRules(rawRanges);
     const nearbyTickets = rawNearbyTickets
       .split('\n')
       .slice(1)
       .map((line) => line.split(',').map((x) => Number.parseInt(x)))
       .filter((ticket) => ticket.every((field) => matchRules(field, rules)));
-
-    const ticketLength = nearbyTickets[0].length;
-
-    /** @type {Map<number, string>} */
-    let ticketFields = new Map();
-
-    for (let i = 0; i < ticketLength; ++i) {
-      for (let j = 0; j < rules.length; ++j) {
-        const rule = rules[j];
-
-        if (nearbyTickets.every((ticket) => matchRule(ticket[i], rule))) {
-          console.log('Setting', rule.id, i);
-          ticketFields.set(i, rule.id);
-
-          rules.splice(j, 1);
-          break;
-        }
-      }
-    }
-
-    console.log(ticketFields);
+    const possibleTicketFields = getPossibleTicketFields(nearbyTickets, rules);
+    const finalTicketFields = refineTicketFields(possibleTicketFields);
 
     /** @type {Array<number>} */
     let indexes = [];
 
-    ticketFields.forEach((value, key) => {
-      if (value.startsWith('departure')) {
-        indexes.push(key);
+    finalTicketFields.forEach((name, i) => {
+      if (name.startsWith('departure')) {
+        indexes.push(i);
       }
     });
 
@@ -100,8 +51,6 @@ module.exports = {
       .split('\n')[1]
       .split(',')
       .map((x) => Number.parseInt(x));
-
-    console.log(ticket);
 
     return indexes.reduce((acc, value) => acc * ticket[value], 1);
   },
@@ -119,6 +68,28 @@ module.exports = {
  * @property {Range} range1
  * @property {Range} range2
  */
+
+/**
+ * @param {string} ranges
+ * @returns {Array<Rule>}
+ */
+function parseRules(ranges) {
+  return ranges.split('\n').map((line) => {
+    const re = /(?<id>\w+\s*\w*):\s(?<range1>\d+-\d+)\sor\s(?<range2>\d+-\d+)/g;
+    const match = re.exec(line);
+
+    const { id, range1, range2 } = match.groups;
+
+    const [min1, max1] = range1.split('-').map((x) => Number.parseInt(x));
+    const [min2, max2] = range2.split('-').map((x) => Number.parseInt(x));
+
+    return {
+      id,
+      range1: { min: min1, max: max1 },
+      range2: { min: min2, max: max2 },
+    };
+  });
+}
 
 /**
  * @param {number} value
@@ -140,4 +111,63 @@ function matchRule(value, rule) {
  */
 function matchRules(value, rules) {
   return rules.some((rule) => matchRule(value, rule));
+}
+
+/**
+ * @param {Array<Array<number>>} nearbyTickets
+ * @param {Array<Rule>} rules
+ * @returns {Array<Set<string>>}
+ */
+function getPossibleTicketFields(nearbyTickets, rules) {
+  /** @type {Array<Set<string>>} */
+  let possibleTicketFields = [];
+
+  const ticketLength = nearbyTickets[0].length;
+
+  for (let i = 0; i < ticketLength; ++i) {
+    for (let j = 0; j < rules.length; ++j) {
+      const rule = rules[j];
+
+      if (nearbyTickets.every((ticket) => matchRule(ticket[i], rule))) {
+        let ruleset = possibleTicketFields[i];
+
+        if (ruleset) {
+          ruleset.add(rule.id);
+        } else {
+          ruleset = new Set([rule.id]);
+        }
+
+        possibleTicketFields[i] = ruleset;
+      }
+    }
+  }
+
+  return possibleTicketFields;
+}
+
+/**
+ * @param {Array<Set<string>>} ticketFields
+ * @returns {Array<string>}
+ */
+function refineTicketFields(ticketFields) {
+  /** @type Array<number> */
+  let validIndexes = [];
+
+  while (ticketFields.some((field) => field.size > 1)) {
+    const indexes = ticketFields
+      .map((set, i) => (set.size === 1 ? i : null))
+      .filter((value) => value !== null);
+    const [index] = indexes.filter((i) => !validIndexes.includes(i));
+    const [name] = ticketFields[index].values();
+
+    validIndexes.push(index);
+
+    ticketFields.forEach((field, i) => {
+      if (!validIndexes.includes(i)) {
+        field.delete(name);
+      }
+    });
+  }
+
+  return ticketFields.flatMap((field) => Array.from(field.values()));
 }
